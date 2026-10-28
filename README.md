@@ -4,7 +4,9 @@ Unofficial practice exam and reviewer for **SC-300: Microsoft Identity and Acces
 
 ## About this reviewer
 
-This is a personal study aid for learning the SC-300 skills. It is meant for understanding the concepts, not for memorizing answers.
+**This is purely for practice. It is not a Microsoft exam, not an official Microsoft practice test, and not an exam dump. If you are looking for dumps, this is not it.**
+
+It is a personal study aid for learning the SC-300 skills: you answer practice questions, then read why each answer fits and why the other options do not. It is meant for understanding the concepts, not for memorizing answers.
 
 - It is not affiliated with, endorsed by or sponsored by Microsoft. It does not claim to contain questions from the live exam, and it does not promise a pass.
 - The practice questions were transcribed from a third-party practice PDF. The explanations, the notes on each wrong option, the takeaways and the Microsoft Learn links were written for this reviewer, to teach why each answer fits.
