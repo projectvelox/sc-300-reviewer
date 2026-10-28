@@ -1,0 +1,6 @@
+# The source PDF is not part of the published reviewer.
+*.pdf
+
+# Working folders of the build and test tools.
+_work/
+tools/.test-deps/
