@@ -60,7 +60,7 @@
    *         caseTab, onCaseTab, pane, onPane, caseProgress, locked }
    */
   function buildQuestionLayout(q, opts) {
-    const typeLabel = { single: "", multi: "Multiple response", yesno: "Hotspot", dropdown: "Hotspot", order: "Drag and drop", dragdrop: "Drag and drop" }[q.type];
+    const typeLabel = { single: "", multi: "Multiple response", yesno: "Hotspot", dropdown: "Hotspot", order: "Drag and drop", dragdrop: "Drag and drop", simulation: "Simulation" }[q.type];
     const article = h("article", { class: "question", "aria-labelledby": "question-title" },
       h("header", { class: "question__head" },
         h("h1", { class: "question__title", id: "question-title", tabindex: "-1" }, "Question " + opts.number),
@@ -444,7 +444,8 @@
       save();
       renderQuestion(false);
       const g = E.grade(q, session.answers[q.id]);
-      announce(g.status === "correct" ? "Correct." : g.status === "unanswered" ? "Not answered. The correct answer is shown." : "Incorrect. The correct answer is shown.");
+      announce(q.type === "simulation" ? "The reference solution is shown."
+        : g.status === "correct" ? "Correct." : g.status === "unanswered" ? "Not answered. The correct answer is shown." : "Incorrect. The correct answer is shown.");
       // Keep the verdict and the marked options on screen; the explanation follows below.
       const result = main.querySelector(".result");
       const block = main.querySelector(".answer-block");
@@ -592,6 +593,8 @@
         rules.push("This session is not timed. Your score is saved to your history when you finish the session.");
         if (sets.length) rules.push("This session includes " + sets.length + (sets.length === 1 ? " scenario set" : " scenario sets") + ". The scenario stays on screen while you answer its questions.");
       }
+      const sims = session.order.filter((id) => E.byId.get(id).type === "simulation").length;
+      if (sims) rules.push("This session includes " + sims + (sims === 1 ? " simulation" : " simulations") + ". A simulation is a lab task that cannot be performed here. You record whether you could complete it, and it is scored from that self-assessment. The reference solution is shown with the answer.");
       const requested = session.requested === "all" ? null : session.requested;
       clear(main).appendChild(h("div", { class: "layout layout--single" },
         h("div", { class: "intro" },

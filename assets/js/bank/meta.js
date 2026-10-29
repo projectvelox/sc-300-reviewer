@@ -14,7 +14,7 @@
  *   source      question number in the PDF, unique and increasing. If the PDF's
  *               numbering restarts (per topic, for example), use the running
  *               position in the file instead.
- *   type        single | multi | yesno | dropdown | order | dragdrop
+ *   type        single | multi | yesno | dropdown | order | dragdrop | simulation
  *   domain      a key of `domains` below
  *   topic       short topic label, used for the performance breakdown
  *   difficulty  Basic | Intermediate | Advanced
@@ -41,6 +41,10 @@
  *   order          : sourceLabel?, items [], answer [item indexes in sequence]
  *   dragdrop       : sourceLabel, sources [], targets [{ id, label }],
  *                    answer { id: sourceIndex }. Add template for targets inside code.
+ *   simulation     : solution [blocks], the reference steps printed in the PDF. A lab
+ *                    task has nothing to select; the user records a self-assessment
+ *                    ("I can complete this task"), and answer is ["can"].
+ *                    explanation.wrong is optional.
  *
  * `answer` is always the answer printed in the reference PDF.
  */
@@ -275,6 +279,33 @@ window.EXAM = {
             "You have a Microsoft 365 E5 subscription.",
             "You create a user named User1.",
             "You need to ensure that User1 can update the status of Identity Secure Score improvement actions."
+          ]
+        }
+      ]
+    },
+
+    "series-mfa-fraud-alert": {
+      id: "series-mfa-fraud-alert",
+      title: "Scenario set: Block users who report an MFA request they did not initiate",
+      shortTitle: "MFA fraud alert",
+      noReturn: true,
+      sections: [
+        {
+          id: "overview",
+          title: "Overview",
+          blocks: [
+            "Note: This question is part of a series of questions that present the same scenario. Each question in the series contains a unique solution that might meet the stated goals. Some question sets might have more than one correct solution, while others might not have a correct solution.",
+            "After you answer a question in this section, you will NOT be able to return to it. As a result, these questions will not appear in the review screen."
+          ]
+        },
+        {
+          id: "scenario",
+          title: "Scenario",
+          blocks: [
+            "You have a Microsoft 365 tenant.",
+            "All users must use the Microsoft Authenticator app for multi-factor authentication (MFA) when accessing Microsoft 365 services.",
+            "Some users report that they received an MFA prompt on their Microsoft Authenticator app without initiating a sign-in request.",
+            "You need to block the users automatically when they report an MFA request that they did not initiate."
           ]
         }
       ]

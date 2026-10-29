@@ -502,6 +502,43 @@
     return root;
   }
 
+  /* ---------- Simulation: a lab task with a self-assessment ---------- */
+
+  function simulationWidget(q, ctx) {
+    const name = uid("sim");
+    let value = (ctx.answer || []).slice();
+    const group = h("fieldset", { class: "choices choices--sim" },
+      h("legend", { class: "choices__legend" }, "Self-assessment"));
+
+    E.SIM_CHOICES.forEach(([val, text]) => {
+      const inputId = uid("opt");
+      const selected = value[0] === val;
+      const input = h("input", { type: "radio", name, id: inputId, value: val, checked: selected, disabled: ctx.readOnly });
+      input.addEventListener("change", () => {
+        value = [val];
+        group.querySelectorAll(".choice").forEach((row) => row.classList.toggle("is-selected", row.querySelector("input").checked));
+        ctx.onChange(value.slice());
+      });
+      let state = null;
+      let verdict = null;
+      let stateClass = selected ? " is-selected" : "";
+      if (ctx.reveal) {
+        const ok = val === "can";
+        state = h("span", { class: "choice__state choice__state--" + (selected ? (ok ? "ok" : "bad") : "none"), "aria-hidden": "true" },
+          selected ? icon(ok ? "check" : "close", { size: 14 }) : null);
+        if (selected) verdict = badge(ok, "Your self-assessment");
+        stateClass = " is-revealed" + (selected ? (ok ? " is-correct" : " is-wrong") : " is-dim");
+      }
+      group.appendChild(h("label", { class: "choice choice--plain" + stateClass, for: inputId },
+        input, state, h("div", { class: "choice__body" }, h("span", null, text)), verdict));
+    });
+
+    return h("div", { class: "answer-area" },
+      h("h3", { class: "answer-area__title" }, "Answer Area"),
+      h("p", { class: "sim-note" }, "This is a lab task. On the exam you complete it in a live environment, so it cannot be scored here. Work out the steps you would take, then record whether you could complete the task. The reference solution is shown with the answer."),
+      group);
+  }
+
   /* ---------- Factory ---------- */
 
   function createWidget(q, ctx) {
@@ -511,6 +548,7 @@
       case "dropdown": return dropdownWidget(q, ctx);
       case "order": return orderWidget(q, ctx);
       case "dragdrop": return matchWidget(q, ctx);
+      case "simulation": return simulationWidget(q, ctx);
       default: return h("p", null, "Unsupported question type: " + q.type);
     }
   }
@@ -533,8 +571,10 @@
     const g = E.grade(q, answer);
     const key = E.keyOf(q);
     const partial = g.status === "incorrect" && g.points > 0 && g.max > 1;
-    const title = g.status === "correct" ? "Correct"
-      : g.status === "unanswered" ? "Not answered"
+    const sim = q.type === "simulation";
+    const title = g.status === "unanswered" ? "Not answered"
+      : sim ? "Self-assessed: " + (g.status === "correct" ? "can complete" : "cannot complete")
+      : g.status === "correct" ? "Correct"
       : partial ? "Incorrect \u2014 " + g.points + " of " + g.max + " selections correct" : "Incorrect";
     const statusIcon = g.status === "correct" ? "check" : g.status === "unanswered" ? "dash" : "close";
 
@@ -544,6 +584,8 @@
       const mine = g.status === "unanswered" ? null
         : pair("Your answer", answer.slice().sort().map((k) => keyChip(k, key.includes(k) ? "ok" : "bad")));
       detail = [mine, g.status === "correct" ? null : pair("Correct answer", key.slice().sort().map((k) => keyChip(k, "ok")))];
+    } else if (sim) {
+      detail = h("span", { class: "result__hint" }, "A lab task is scored from your own assessment. Compare the steps you would take with the reference solution below.");
     } else {
       detail = g.status === "correct" ? null
         : h("span", { class: "result__hint" }, g.status === "unanswered"
@@ -589,7 +631,14 @@
 
     const section = (title, ...kids) => h("section", { class: "fb__section" }, h("h4", { class: "fb__heading" }, title), kids);
 
-    const cards = g.status === "correct"
+    const cards = q.type === "simulation"
+      ? [
+        g.status === "unanswered"
+          ? answerCard("none", "dash", "Your self-assessment", h("p", { class: "muted" }, "No self-assessment recorded."), true)
+          : answerCard(g.status === "correct" ? "ok" : "bad", g.status === "correct" ? "check" : "close", "Your self-assessment", answerLines(q, answer, false), true),
+        answerCard("ok", "check", "Reference solution", renderBlocks(q.solution), true)
+      ]
+      : g.status === "correct"
       ? answerCard("ok", "check", "Your answer \u2014 correct", answerLines(q, answer, false), true)
       : [
         g.status === "unanswered"
@@ -600,7 +649,7 @@
 
     const whyTitle = isChoice(q)
       ? "Why " + joinLetters(key) + (key.length > 1 ? " are" : " is") + " correct"
-      : "Why this is correct";
+      : q.type === "simulation" ? "Why this solution works" : "Why this is correct";
 
     // For choice questions each wrong option is labelled with its letter and
     // whether it was the user's pick.

@@ -504,6 +504,11 @@ code {
 .result__hint { font-size: 14px; flex: 1 1 280px; }
 .result .tag { margin-left: auto; }
 
+/* Simulation (lab task): a note and two self-assessment options without letters. */
+.sim-note { font-size: 14px; }
+.choices--sim { margin-top: 12px; }
+.choice--plain { grid-template-columns: auto minmax(0, 1fr) auto; }
+
 .widget-message { margin-top: 8px; padding: 8px 12px; font-size: 14px; background: var(--warn-tint); border: 1px solid var(--warn-line); }
 .widget-message[hidden] { display: none; }
 .widget-hint { margin-top: 10px; font-size: 13px; color: var(--text-2); }
@@ -752,6 +757,7 @@ dialog.dialog {
   .choice { padding: 10px; gap: 4px 8px; }
   .choice.is-correct, .choice.is-wrong { padding: 9px; }
   .choice .badge { grid-column: 3 / -1; justify-self: start; }
+  .choice--plain .badge { grid-column: 2 / -1; }
   .result { gap: 8px 16px; }
   .result .tag { margin-left: 0; }
   .code { font-size: 12.5px; }

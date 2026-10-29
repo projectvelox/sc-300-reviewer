@@ -3,4 +3,5 @@
 
 # Working folders of the build and test tools.
 _work/
+_work2/
 tools/.test-deps/

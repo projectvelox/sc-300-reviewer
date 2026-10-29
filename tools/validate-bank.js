@@ -24,7 +24,7 @@ if (!D || !Array.isArray(D.questions)) { console.error("window.EXAM.questions is
 const errors = [];
 const warn = [];
 const E = (q, message) => errors.push((q.id || "?") + ": " + message);
-const TYPES = ["single", "multi", "yesno", "dropdown", "order", "dragdrop"];
+const TYPES = ["single", "multi", "yesno", "dropdown", "order", "dragdrop", "simulation"];
 const placeholders = (template) => Array.from(template.matchAll(/\{\{(\w+)\}\}/g)).map((m) => m[1]);
 
 if (!D.exam || !D.exam.code || /XX-000/.test(D.exam.code)) errors.push("meta.js: exam.code is not set.");
@@ -83,6 +83,9 @@ D.questions.forEach((q, index) => {
     if (!Array.isArray(q.sources) || !Array.isArray(q.targets) || !q.targets.length) return E(q, "needs sources and targets");
     q.targets.forEach((t) => { if (!(key[t.id] >= 0 && key[t.id] < q.sources.length)) E(q, "answer for target " + t.id + " is out of range"); if (!t.label) E(q, "target " + t.id + " has no label"); });
     if (q.template) { const used = placeholders(q.template); q.targets.forEach((t) => { if (!used.includes(t.id)) E(q, "template has no {{" + t.id + "}}"); }); }
+  } else if (q.type === "simulation") {
+    if (!Array.isArray(key) || key.length !== 1 || key[0] !== "can") E(q, "a simulation's answer must be [\"can\"]");
+    checkBlocks(q, q.solution, "solution");
   }
 
   const ex = q.explanation;
@@ -90,7 +93,7 @@ D.questions.forEach((q, index) => {
   if (!Array.isArray(ex.correct) || !ex.correct.length) E(q, "explanation.correct is empty");
   if (!ex.concept) E(q, "explanation.concept is empty");
   if (!ex.takeaway) E(q, "explanation.takeaway is empty");
-  if (!Array.isArray(ex.wrong) || !ex.wrong.length) E(q, "explanation.wrong is empty");
+  if (q.type !== "simulation" && (!Array.isArray(ex.wrong) || !ex.wrong.length)) E(q, "explanation.wrong is empty");
   if (ex.keyNote) E(q, "keyNote is not supported: the answers are the PDF's, with no notes");
   (ex.refs || []).forEach((r) => { if (!Array.isArray(r) || !/^https:\/\//.test(r[1] || "")) E(q, "reference must be [label, https url]"); });
   if (!ex.refs || !ex.refs.length) warn.push(q.id + ": no reference link");
@@ -122,6 +125,7 @@ function printable(q) {
   if (q.type === "yesno") return key.map((v) => (v ? "Y" : "N")).join("");
   if (q.type === "dropdown") return q.fields.map((f) => f.options[key[f.id]]).join(" | ");
   if (q.type === "order") return key.map((i, n) => (n + 1) + ". " + String(q.items[i]).slice(0, 40)).join(" | ");
+  if (q.type === "simulation") return "(lab task, self-assessed)";
   return q.targets.map((t) => q.sources[key[t.id]]).join(" | ");
 }
 

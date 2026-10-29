@@ -16,11 +16,14 @@
     return q.answer;
   }
 
+  /** A simulation has no selectable answer. The user records one of these. */
+  const SIM_CHOICES = [["can", "I can complete this task"], ["cannot", "I cannot complete this task"]];
+
   /* ---------- Answer state ---------- */
 
   function emptyAnswer(q) {
     switch (q.type) {
-      case "single": case "multi": case "order": return [];
+      case "single": case "multi": case "order": case "simulation": return [];
       case "yesno": return q.statements.map(() => null);
       default: return {};
     }
@@ -39,6 +42,7 @@
       case "single": filled = a.length; needed = 1; break;
       case "multi": filled = a.length; needed = keyOf(q).length; break;
       case "order": filled = a.length; needed = keyOf(q).length; break;
+      case "simulation": filled = a.length; needed = 1; break;
       case "yesno": filled = a.filter((v) => v !== null && v !== undefined).length; needed = q.statements.length; break;
       default: {
         const ids = slotIds(q);
@@ -84,6 +88,11 @@
         points = same ? 1 : 0;
         break;
       }
+      case "simulation":
+        // A lab task cannot be checked here. It is scored from the user's own assessment.
+        parts = [state !== "none" && a[0] === "can"];
+        points = parts[0] ? 1 : 0;
+        break;
       case "yesno":
         max = key.length;
         parts = key.map((k, i) => state !== "none" && a[i] === k);
@@ -113,6 +122,11 @@
   function describe(q, a, useKey) {
     const value = useKey ? keyOf(q) : a;
     if (!useKey && answerState(q, a) === "none") return [];
+    if (q.type === "simulation") {
+      if (useKey) return ["See the reference solution."];
+      const choice = SIM_CHOICES.find((c) => c[0] === a[0]);
+      return choice ? [choice[1]] : [];
+    }
     switch (q.type) {
       case "single": case "multi":
         return value.slice().sort().map((k) => {
@@ -146,7 +160,8 @@
     yesno: "Hotspot (Yes/No)",
     dropdown: "Hotspot (drop-down)",
     order: "Drag and drop (sequence)",
-    dragdrop: "Drag and drop (match)"
+    dragdrop: "Drag and drop (match)",
+    simulation: "Simulation (lab task)"
   };
 
   /* ---------- Question-level history ---------- */
@@ -398,7 +413,7 @@
   }
 
   App.engine = {
-    data: D, byId, keyOf, emptyAnswer, slotIds, answerState, grade, describe, summaryLine, TYPE_LABELS,
+    data: D, byId, keyOf, emptyAnswer, slotIds, answerState, grade, describe, summaryLine, TYPE_LABELS, SIM_CHOICES,
     loadStats, poolCounts, availableCount, createSession, saveSession, loadSession, clearSession,
     loadAttempts, getAttempt, tally, finishSession, markReviewed, clearHistory, historySummary, rankBuckets
   };

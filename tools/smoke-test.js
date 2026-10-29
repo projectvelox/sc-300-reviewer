@@ -90,6 +90,8 @@ const answerCurrent = (useKey) => {
       const el = main.querySelector('.dnd-item[data-item="' + item + '"]');
       el.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
     });
+  } else if (q.type === "simulation") {
+    main.querySelector('.choices--sim input[value="' + (useKey ? "can" : "cannot") + '"]').click();
   } else if (q.type === "dragdrop") {
     slotOrder(q.targets).forEach((id, i) => {
       main.querySelector('.dnd-list--bank .dnd-item[data-source="' + (useKey ? key[id] : 0) + '"]').click();
@@ -301,7 +303,12 @@ const centerOf = (page, selector, index) => page.evaluate((selector, index) => {
         s.begun = true; s.startedAt = Date.now(); App.engine.saveSession(s); location.hash = "#/exam";
       }, info.firstOfType[kind]);
       await sleep(300);
-      await page.evaluate(() => document.querySelector(".answer-area").scrollIntoView({ block: "center" })); await sleep(60);
+      // An answer area taller than the pane is aligned to its source list, so the drag source stays on screen.
+      await page.evaluate((order) => {
+        const area = document.querySelector(".answer-area");
+        if (area.offsetHeight <= document.querySelector(".exam-main").clientHeight) return area.scrollIntoView({ block: "center" });
+        (document.querySelector(order ? ".order__col" : ".dnd-list--bank") || area).scrollIntoView({ block: "start" });
+      }, kind.startsWith("order")); await sleep(60);
       const isOrder = kind.startsWith("order");
       const from = await centerOf(page, (isOrder ? ".order__col:nth-child(1) " : ".dnd-list--bank ") + (touch ? ".dnd-item__grip" : ".dnd-item"), 0);
       const to = await centerOf(page, isOrder ? ".dnd-list--answer" : ".slot", 0);

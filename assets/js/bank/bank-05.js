@@ -380,8 +380,8 @@ window.EXAM.questions.push(
       "From Active Directory Users and Computers, you add the following user:",
       { list: [
         "Name: User3",
-        "UPN: User3@contoso.com",
-        "Proxy addresses: smtp: [address not legible in the source], smtp: [address not legible in the source]"
+        "UPN: user3@contoso.com",
+        "Proxy addresses: smtp: user3@contoso.com, smtp: sales@contoso.com"
       ] },
       "From Active Directory Users and Computers, you update the proxyAddresses attribute for each user as shown in the following table.",
       { table: { head: ["Name", "Proxy address"], rows: [
@@ -409,7 +409,7 @@ window.EXAM.questions.push(
       correct: [
         "ProxyAddresses and UserPrincipalName must be unique across Microsoft Entra ID, and which error you get depends on whether the object is already synced or new.",
         "User1 gains admin@contoso.com, which no other object uses, so User1 syncs successfully. User2 is an existing synced user that now claims sales@contoso.com, which User1 already holds; an update that duplicates a unique value on an existing object produces **AttributeValueMustBeUnique**.",
-        "User3 is a new object. When a new on-premises object tries to soft-match (by proxy address or UPN) an object in Microsoft Entra ID that is already linked to another on-premises object, Microsoft Entra Connect reports **InvalidSoftMatch**. That is the reference answer for User3; the PDF does not show User3's proxy addresses legibly."
+        "User3 is a new object whose proxy addresses include sales@contoso.com, which already belongs to a synced object. When a new on-premises object tries to soft-match (by proxy address or UPN) an object in Microsoft Entra ID that is already linked to another on-premises object, Microsoft Entra Connect reports **InvalidSoftMatch**."
       ],
       wrong: [
         ["User2: InvalidSoftMatch", "User2 already exists in the cloud. Duplicate values on an existing synced object raise AttributeValueMustBeUnique; InvalidSoftMatch is for new objects."],
